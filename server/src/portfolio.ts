@@ -8,7 +8,8 @@ export const portfolioRouter = Router();
 portfolioRouter.use(requireAuth);
 
 const TYPES = ['SIP', 'LUMPSUM', 'REDEMPTION'];
-const today = () => new Date().toISOString().slice(0, 10);
+// NAV dates are Indian calendar days, so "today" is IST, not UTC (UTC lags IST by 5:30 every morning).
+const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
 portfolioRouter.get('/funds/search', async (req, res) => {
   const q = String(req.query.q ?? '').trim();
@@ -25,8 +26,12 @@ portfolioRouter.post('/transactions', async (req, res) => {
 
   if (!Number.isInteger(schemeCode) || schemeCode <= 0) throw new HttpError(400, 'Invalid schemeCode');
   if (!TYPES.includes(type)) throw new HttpError(400, `type must be one of ${TYPES.join(', ')}`);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(Date.parse(date)) || date > today()) throw new HttpError(400, 'Invalid date');
-  if (!/^\d+(\.\d{1,2})?$/.test(amount) || Number(amount) <= 0) throw new HttpError(400, 'amount must be a positive number with up to 2 decimals');
+  // Round-trip check rejects impossible dates like 2024-02-30, which Date.parse silently rolls over.
+  const parsed = new Date(date);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) throw new HttpError(400, 'Invalid date');
+  if (date > today()) throw new HttpError(400, 'Date cannot be in the future');
+  if (!/^\d+(\.\d{1,2})?$/.test(amount)) throw new HttpError(400, 'amount must be a number with up to 2 decimals');
+  if (Number(amount) < 1 || Number(amount) > 1e9) throw new HttpError(400, 'amount must be between ₹1 and ₹100 crore');
 
   await ensureFund(schemeCode);
 
