@@ -15,14 +15,16 @@ type Call = <T>(path: string, body?: unknown) => Promise<T>;
 // ---------- formatting ----------
 
 const grouped2 = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// NAV and units at the 4 decimals AMFI publishes, so amount ÷ NAV = units checks out on screen.
+const grouped4 = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const sign = (n: number) => (n > 0 ? '+' : n < 0 ? '−' : '');
 const pct = (v: number | null, signed = false) =>
   v === null || !Number.isFinite(v) ? '—' : `${signed ? sign(v) : v < 0 ? '−' : ''}${Math.abs(v * 100).toFixed(2)}%`;
-const fmtDate = (iso: string) =>
-  new Date(`${iso}T00:00:00`).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+const fmtDate = (iso: string) => { const [y, m, d] = iso.split('-'); return `${d} ${MONTHS[Number(m) - 1]} ${y}`; };
 const today = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
 const compact = (n: number) =>
-  n >= 1e7 ? `₹${(n / 1e7).toFixed(1)}Cr` : n >= 1e5 ? `₹${(n / 1e5).toFixed(1)}L` : n >= 1e3 ? `₹${(n / 1e3).toFixed(0)}k` : `₹${n}`;
+  n >= 1e7 ? `₹${+(n / 1e7).toFixed(2)}Cr` : n >= 1e5 ? `₹${+(n / 1e5).toFixed(2)}L` : n >= 1e3 ? `₹${+(n / 1e3).toFixed(1)}k` : `₹${n}`;
 const TYPE_LABEL: Record<TxnType, string> = { SIP: 'SIP', LUMPSUM: 'Lump sum', REDEMPTION: 'Redemption' };
 
 // Rupees with the paise set smaller, so exact values stay readable at a glance.
@@ -110,8 +112,7 @@ function Rosette({ className = '', monogram = true }: { className?: string; mono
   const paths = useMemo(() => {
     const layers = [
       { R: 60, r: 13, d: 34, scale: 1 },
-      { R: 72, r: 17, d: 26, scale: 0.8 },
-      { R: 50, r: 9, d: 20, scale: 0.56 },
+      { R: 72, r: 17, d: 26, scale: 0.78 },
     ];
     return layers.map(({ R, r, d, scale }) => {
       const k = (R - r) / r;
@@ -134,7 +135,7 @@ function Rosette({ className = '', monogram = true }: { className?: string; mono
       <circle cx="100" cy="100" r="97" pathLength={1} />
       <circle cx="100" cy="100" r="94" pathLength={1} />
       {paths.map((d, i) => <path key={i} d={d} pathLength={1} style={{ animationDelay: `${i * 120}ms` }} />)}
-      {monogram && <text x="100" y="100" className="rosette-mono">FL</text>}
+      {monogram && <><circle cx="100" cy="100" r="25" className="cartouche" /><text x="100" y="100" className="rosette-mono">FL</text></>}
     </svg>
   );
 }
@@ -383,12 +384,12 @@ function ValueChart({ history, txns, focusFund }: { history: Point[]; txns: Txn[
       {data.length < 2 ? (
         <p className="plate-empty">Your value line appears here once you’ve recorded a transaction at least a week ago.</p>
       ) : (
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={230}>
           <LineChart data={data} margin={{ top: 12, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--rule-soft)" />
             <XAxis
               dataKey="t" type="number" scale="time" domain={['dataMin', 'dataMax']}
-              tickFormatter={t => new Date(t).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' })}
+              tickFormatter={t => { const d = new Date(t); return `${MONTHS[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`; }}
               tick={{ fontSize: 12, fill: 'var(--ink-2)' }} tickLine={false} axisLine={{ stroke: 'var(--ink)' }} minTickGap={48}
             />
             <YAxis
@@ -619,7 +620,7 @@ function Holdings({ funds, focusFund, onFocusFund }: { funds: Fund[]; focusFund:
         <p className="plate-empty">Funds you hold will be listed here with units, NAV and returns.</p>
       ) : (
         <div className="table-wrap">
-          <table>
+          <table className="holdings-table">
             <thead>
               <tr>
                 <th scope="col">Fund</th>
@@ -645,8 +646,8 @@ function Holdings({ funds, focusFund, onFocusFund }: { funds: Fund[]; focusFund:
                       <span className="fund-name">{f.name}</span>
                       <span className="fund-cat"><i style={{ background: c.color }} />{c.label}</span>
                     </th>
-                    <td className="num">{Number(f.units).toLocaleString('en-IN', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</td>
-                    <td className="num">{grouped2.format(Number(f.latest_nav))}<span className="cell-sub">{fmtDate(f.nav_date)}</span></td>
+                    <td className="num">{grouped4.format(Number(f.units))}</td>
+                    <td className="num">{grouped4.format(Number(f.latest_nav))}<span className="cell-sub">{fmtDate(f.nav_date)}</span></td>
                     <td className="num"><Money value={f.invested} /></td>
                     <td className="num strong"><Money value={f.current_value} /></td>
                     <td className={`num ${gain > 0 ? 'gain' : gain < 0 ? 'loss' : ''}`}>
@@ -676,7 +677,7 @@ function Ledger({ txns, focusFund }: { txns: Txn[]; focusFund: number | null }) 
         <p className="plate-empty">Every SIP, lump sum and redemption you record is kept here with the NAV it used.</p>
       ) : (
         <div className="table-wrap">
-          <table>
+          <table className="ledger-table">
             <thead>
               <tr>
                 <th scope="col">Date</th>
@@ -694,8 +695,8 @@ function Ledger({ txns, focusFund }: { txns: Txn[]; focusFund: number | null }) 
                   <td>{t.name}</td>
                   <td><span className={`type-mark ${t.type === 'REDEMPTION' ? 'out' : ''}`}>{TYPE_LABEL[t.type]}</span></td>
                   <td className="num"><Money value={t.amount} /></td>
-                  <td className="num">{grouped2.format(Number(t.nav))}</td>
-                  <td className="num">{t.type === 'REDEMPTION' ? '−' : '+'}{Number(t.units).toLocaleString('en-IN', { minimumFractionDigits: 4 })}</td>
+                  <td className="num">{grouped4.format(Number(t.nav))}</td>
+                  <td className="num">{t.type === 'REDEMPTION' ? '−' : '+'}{grouped4.format(Number(t.units))}</td>
                 </tr>
               ))}
             </tbody>

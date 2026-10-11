@@ -57,11 +57,13 @@ abbr[title] { text-decoration: underline dotted var(--ink-3); text-underline-off
 .wordmark.small { font-size: 1.45rem; }
 
 h2 {
-  font-size: 0.8rem;
+  font-family: var(--serif);
+  font-size: 1.4rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
   color: var(--ink);
+  font-optical-sizing: auto;
 }
 
 .money { white-space: nowrap; }
@@ -86,7 +88,7 @@ input {
 }
 input:hover { border-color: var(--ink-2); }
 input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; background: #fff; }
-input::placeholder { color: var(--ink-3); }
+input::placeholder { color: var(--ink-2); }
 input[type='date'] { font-variant-numeric: tabular-nums; }
 input[type='date']::-webkit-calendar-picker-indicator { opacity: 0.6; cursor: pointer; }
 
@@ -101,11 +103,10 @@ button:disabled { cursor: progress; opacity: 0.6; }
   padding: 9px 22px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  box-shadow: 0 1px 0 rgba(22, 35, 58, 0.25), 0 2px 6px -2px rgba(22, 35, 58, 0.35);
   transition: background 160ms var(--ease), transform 160ms var(--ease);
 }
 .primary:hover:not(:disabled) { background: #0c1628; }
-.primary:active:not(:disabled) { transform: translateY(1px); box-shadow: none; }
+.primary:active:not(:disabled) { transform: translateY(1px); }
 
 .text-btn {
   background: none;
@@ -151,7 +152,7 @@ button:disabled { cursor: progress; opacity: 0.6; }
 .rosette path, .rosette circle {
   fill: none;
   stroke: var(--engrave);
-  stroke-width: 0.55;
+  stroke-width: 0.9;
   vector-effect: non-scaling-stroke;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
@@ -167,6 +168,7 @@ button:disabled { cursor: progress; opacity: 0.6; }
   dominant-baseline: central;
   letter-spacing: 0.02em;
 }
+.rosette .cartouche { fill: var(--sheet); stroke: var(--ink-2); stroke-width: 0.9; stroke-dasharray: none; stroke-dashoffset: 0; animation: none; }
 @keyframes engrave { to { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) {
   .rosette path, .rosette circle { animation: none; stroke-dashoffset: 0; }
@@ -196,7 +198,8 @@ button:disabled { cursor: progress; opacity: 0.6; }
 }
 .auth-sheet {
   width: min(440px, 100%);
-  border: 3px double var(--ink);
+  border: 1px solid var(--ink);
+  box-shadow: inset 0 0 0 4px var(--sheet), inset 0 0 0 5px var(--ink);
   padding: 0 var(--s4);
   background:
     radial-gradient(circle at 50% 0%, rgba(143, 165, 154, 0.16), transparent 60%),
@@ -250,7 +253,8 @@ button:disabled { cursor: progress; opacity: 0.6; }
 /* ---------- certificate ---------- */
 
 .certificate {
-  border: 3px double var(--ink);
+  border: 1px solid var(--ink);
+  box-shadow: inset 0 0 0 4px var(--sheet), inset 0 0 0 5px var(--ink);
   padding: 0 var(--s5);
   background:
     radial-gradient(ellipse at 88% 50%, rgba(143, 165, 154, 0.18), transparent 55%),
@@ -261,11 +265,11 @@ button:disabled { cursor: progress; opacity: 0.6; }
   grid-template-columns: 1fr auto;
   gap: var(--s6);
   align-items: center;
-  padding: var(--s5) 0 var(--s5);
+  padding: var(--s4) 0;
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
 }
-.cert-title { font-size: 0.8rem; color: var(--ink-2); }
+.cert-title { font-size: 1.2rem; font-style: italic; font-weight: 500; color: var(--ink-2); }
 .cert-title abbr { color: var(--ink); }
 .denomination {
   font-family: var(--serif);
@@ -273,7 +277,7 @@ button:disabled { cursor: progress; opacity: 0.6; }
   font-size: clamp(3.6rem, 7vw, 6rem);
   line-height: 0.95;
   letter-spacing: -0.03em;
-  margin: var(--s2) 0 var(--s5);
+  margin: var(--s2) 0 var(--s4);
   font-variant-numeric: lining-nums proportional-nums;
   font-optical-sizing: auto;
 }
@@ -309,6 +313,7 @@ button:disabled { cursor: progress; opacity: 0.6; }
   display: flex; align-items: baseline; justify-content: space-between; gap: var(--s4); flex-wrap: wrap;
   padding-bottom: var(--s3); margin-bottom: var(--s4);
   border-bottom: 1px solid var(--ink);
+  box-shadow: 0 3px 0 -2px var(--ink);
 }
 .plate-empty { color: var(--ink-2); padding: var(--s5) 0; max-width: 52ch; }
 
@@ -352,7 +357,7 @@ button:disabled { cursor: progress; opacity: 0.6; }
 .alloc-name { font-weight: 600; }
 .alloc-pct { font-weight: 600; text-align: right; }
 .alloc-val { grid-column: 2 / 4; font-size: 0.85rem; color: var(--ink-2); }
-.alloc-bar .is-dim, .alloc-list .is-dim { opacity: 0.3; }
+.alloc-bar .is-dim, .alloc-list .is-dim { opacity: 0.25; }
 
 /* ---------- record ---------- */
 
@@ -414,6 +419,7 @@ button:disabled { cursor: progress; opacity: 0.6; }
 .section-head {
   display: flex; align-items: baseline; justify-content: space-between; gap: var(--s4);
   padding-bottom: var(--s3); border-bottom: 1px solid var(--ink);
+  box-shadow: 0 3px 0 -2px var(--ink);
 }
 .section-note { font-size: 0.82rem; color: var(--ink-2); }
 
@@ -434,9 +440,10 @@ tbody th { font-weight: 400; }
 
 tbody tr { transition: background 160ms var(--ease), opacity 160ms var(--ease); }
 tbody tr[tabindex] { cursor: default; }
-tbody tr[tabindex]:hover, tbody tr.is-focus { background: var(--paper-deep); }
+tbody tr[tabindex]:hover, .holdings-table tr.is-focus { background: #dce3e0; }
+.holdings-table tr.is-focus > * { border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
 tbody tr[tabindex]:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
-tbody tr.is-dim { opacity: 0.35; }
+tbody tr.is-dim { opacity: 0.25; }
 
 .fund-name { display: block; font-weight: 600; max-width: 42ch; }
 .fund-cat { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--ink-2); margin-top: 2px; }
@@ -452,7 +459,7 @@ tbody tr.is-dim { opacity: 0.35; }
 
 .skeleton { display: grid; gap: var(--s6); }
 .sk { background: linear-gradient(90deg, var(--paper-deep), var(--sheet), var(--paper-deep)); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
-.sk-cert { height: 300px; border: 3px double var(--rule); }
+.sk-cert { height: 280px; border: 1px solid var(--rule); }
 .sk-plate { height: 320px; }
 @keyframes shimmer { to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
@@ -487,6 +494,21 @@ tbody tr.is-dim { opacity: 0.35; }
   .segmented label { flex: 1; text-align: center; padding-inline: 8px; }
   .record-row > .primary { width: 100%; }
   .legend { width: 100%; }
-  table { min-width: 720px; } /* scroll sideways rather than crush fund names */
+  .holdings-table { min-width: 720px; } /* scroll sideways rather than crush fund names */
+  .ledger-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .ledger-table tr {
+    display: grid; grid-template-columns: auto auto 1fr; column-gap: var(--s3); row-gap: 4px;
+    grid-template-areas: 'fund fund fund' 'date type amount' 'nav nav units';
+    padding: var(--s3) 0; border-bottom: 1px solid var(--rule-soft);
+  }
+  .ledger-table td { padding: 0; border: 0; }
+  .ledger-table td:nth-child(1) { grid-area: date; color: var(--ink-2); }
+  .ledger-table td:nth-child(2) { grid-area: fund; font-weight: 600; }
+  .ledger-table td:nth-child(3) { grid-area: type; }
+  .ledger-table td:nth-child(4) { grid-area: amount; }
+  .ledger-table td:nth-child(5) { grid-area: nav; text-align: left; font-size: 0.85rem; color: var(--ink-2); }
+  .ledger-table td:nth-child(5)::before { content: 'NAV '; }
+  .ledger-table td:nth-child(6) { grid-area: units; font-size: 0.85rem; color: var(--ink-2); }
+  .ledger-table td:nth-child(6)::after { content: ' units'; }
   .table-wrap { margin-right: calc(-1 * var(--s4)); padding-right: var(--s4); }
 }
